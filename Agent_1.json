@@ -1,0 +1,163 @@
+{
+  "name": "Agent_1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -320,
+        -128
+      ],
+      "id": "7c11a74a-fd41-47e5-9602-5cb818cebc23",
+      "name": "When chat message received",
+      "webhookId": "9a9a50f3-7a67-4464-a6f0-4b5c6e6c5d28"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "611da4de-4214-4966-9a76-27643d35cdcb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        112
+      ],
+      "id": "2f9caa6d-8b26-4deb-a361-82a7042f3191",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rfWFTVkw4ZYCKmMM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        464,
+        96
+      ],
+      "id": "459089e4-8a0b-4dc6-b49c-3890c47463ad",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        288,
+        112
+      ],
+      "id": "a980d20a-426b-41c3-904c-19051f5b6e65",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        112,
+        112
+      ],
+      "id": "7a8a120f-b60c-4234-8a1a-150c819874ad",
+      "name": "Calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "50c6da1a-7943-4735-bcee-8cfc46c5f2a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fbe0efa53626387cbeff29d7c129aa9d42fd0624a084d22c4131ad22dce99818"
+  },
+  "id": "v46hjRYh2FaJ3Ims",
+  "tags": []
+}
