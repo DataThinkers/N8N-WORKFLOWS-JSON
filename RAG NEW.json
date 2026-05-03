@@ -1,0 +1,164 @@
+{
+  "name": "RAG NEW",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -256,
+        -176
+      ],
+      "id": "639c139b-27ae-4c50-81a6-385360d15e04",
+      "name": "When chat message received",
+      "webhookId": "32848ebd-d679-4d01-9e56-bc13e9a39fa7"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "\nYou are a retrieval-based assistant.\n\nAnswer the user’s question using only the provided context.\n\nRules:\n\nUse only the retrieved context to answer.\nDo not use any prior or general knowledge.\nIf the answer is not present, reply exactly:\n\"I don't know based on the provided data.\"\nDo not guess, infer, or add extra information.\nCombine multiple context pieces carefully if needed.\nDo not mention sources, databases, embeddings, or internal steps.\nKeep the answer clear, factual, and limited to one sentence."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -48,
+        -176
+      ],
+      "id": "968ae60e-4818-4300-a545-58588095645e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        32
+      ],
+      "id": "a00b5d45-b59d-4d9f-ab7e-95284e31030e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "75XqCk2FpAvkYMFs",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "work with vector store",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "ragdemo",
+          "mode": "list",
+          "cachedResultName": "ragdemo"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        32
+      ],
+      "id": "9b259349-1dec-41d7-be3a-e9ef6454afe2",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "gP4RO6SqpuHBCgMP",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        240
+      ],
+      "id": "ea2dd4c9-5d37-42a7-8e5f-d036c6bb611e",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "75XqCk2FpAvkYMFs",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1f983cd2-2a72-4621-9c3c-e63ed22e9a7f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bfea3f5b61b15b4b332ead9dcd5739c94b67a8721741dcae758b881e94d0038d"
+  },
+  "id": "mAL5Qux9asLFO1Fn",
+  "tags": []
+}

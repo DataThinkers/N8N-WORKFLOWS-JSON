@@ -1,0 +1,16 @@
+RAG Questions (Smart Campus)
+What is the total duration of a semester and how many internal exams are conducted?
+What is the minimum attendance requirement and how much grace attendance is allowed?
+What are the opening hours of the AI & ML Lab, and which lab requires prior booking?
+Who is allowed to access the AR/VR Lab and Networking Lab?
+What are the library timings and how many books can a student borrow?
+What is the late fee for overdue library books and for how many days can books be borrowed?
+How many bus routes are available and what are the timings of the first and last bus?
+Is there any system available to track transportation services?
+What are the hostel entry timings and when are visitors allowed?
+What are the timings for breakfast, lunch, and dinner in the hostel mess?
+When are the annual tech fest, sports week, and hackathon conducted?
+What emergency contact numbers are provided for campus security, medical center, and transport?
+What are the main capabilities of the Smart Campus AI Assistant?
+What are the limitations of the AI Assistant regarding data access and record modification?
+What types of services and data sources does the Smart Campus AI Assistant integrate?
