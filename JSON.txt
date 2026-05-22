@@ -1,0 +1,23 @@
+{
+  "name": "flight_booking_email",
+  "type": "object",
+  "properties": {
+    "booking_email": {
+      "type": "string",
+      "description": "Email address where the flight ticket confirmation should be sent"
+    },
+    "email_subject": {
+      "type": "string",
+      "description": "Subject line for the flight booking confirmation email"
+    },
+    "email_body": {
+      "type": "string",
+      "description": "Professional flight booking confirmation email body with ticket details"
+    }
+  },
+  "required": [
+    "booking_email",
+    "email_subject",
+    "email_body"
+  ]
+}
