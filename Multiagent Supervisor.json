@@ -1,0 +1,195 @@
+{
+  "name": "Multiagent Supervisor",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -160,
+        -144
+      ],
+      "id": "a3ee0162-2eeb-430d-bd1f-5d0c5f458b8c",
+      "name": "When chat message received",
+      "webhookId": "c4401ccd-1c12-4fa5-9e60-bae89820f221"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Supervisor Agent.\n\nYour job is to:\n- understand the student admission request\n- coordinate specialized agents\n- assign marks verification\n- assign document verification\n- and generate a final structured summary.\n\nAssume all required student documents are already uploaded.\n\nKeep the response:\n- short\n- professional\n- structured\n\nDo not explain reasoning."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        48,
+        -144
+      ],
+      "id": "498335cc-2a22-4303-82be-b82947c2019e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "1aa74f54-4db5-4d95-b5f7-e5c347c3cfb0",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "umAwPKnbVSs2DjbQ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Marks Verification Agent",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a Marks Verification Agent.\n\nYour job is to:\n- verify student marks\n- check percentage eligibility\n- and return short verification results.\n\nKeep the response short."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        96
+      ],
+      "id": "2fa2d98d-70fa-4516-8941-f0ed5216aad0",
+      "name": "You are a Marks Verification Agent.  Your job is to: - verify student marks - check percentage eligibility - and return short verification results.  Keep the response short."
+    },
+    {
+      "parameters": {
+        "toolDescription": "Document Verification Agent",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a Document Verification Agent.\n\nYour job is to:\n- verify uploaded documents\n- check Aadhaar card and mark sheet presence\n- and return short verification results.\n\nKeep the response short."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        64,
+        112
+      ],
+      "id": "5362b453-56d2-4311-bcca-7303f488ddc4",
+      "name": "Document Verification Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Admission Summary Agent",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are an Admission Summary Agent.\n\nYour job is to:\n- combine verification results\n- and generate a final admission summary.\n\nKeep the response:\n- short\n- professional\n- easy to read."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        416,
+        80
+      ],
+      "id": "d579a689-f8dd-4b1d-8b92-e615a65613d7",
+      "name": "Admission Summary Agent."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "You are a Marks Verification Agent.  Your job is to: - verify student marks - check percentage eligibility - and return short verification results.  Keep the response short.",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Document Verification Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Admission Summary Agent.",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "You are a Marks Verification Agent.  Your job is to: - verify student marks - check percentage eligibility - and return short verification results.  Keep the response short.": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Verification Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Admission Summary Agent.": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6da81099-686f-4282-bdb3-7df7e1f6a564",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bc8a3c0f33976ed3b940e47f20996e4ffcce3270c629cfc6a664611181b9d1a8"
+  },
+  "id": "Aplb5fYCFiroIqRQ",
+  "tags": []
+}

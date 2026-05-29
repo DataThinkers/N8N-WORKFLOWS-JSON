@@ -1,0 +1,315 @@
+{
+  "name": "Guardrails_Sanitizetext",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -528,
+        -192
+      ],
+      "id": "96578228-d24f-4d35-ae68-31ae7a858e3b",
+      "name": "When chat message received",
+      "webhookId": "b28e82db-44b3-42d5-96b9-3b037649fc44"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.guardrailsInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI Flight Booking Assistant supporting users with travel booking.\n\nThe user will provide travel details such as:\n- source city\n- destination city\n- budget\n- and sometimes preferred travel time.\n\nYour task is to:\n1. Search available flights from the provided flight database.\n2. Identify the most suitable flight based on the user's budget and travel route.\n3. Internally select the best flight option including:\n   - flight name\n   - source\n   - destination\n   - ticket price\n   - departure time\n   - available seats\n4. Generate professional booking details for the selected flight.\n5. Generate a professional flight booking confirmation email.\n6. Generate a professional confirmed flight booking email.\n7. Assume the email is sent only after human approval is completed in the workflow.\n8. The email should sound like a real confirmed airline reservation email.\n\nConstraints:\n• Do NOT perform payment or final reservation.\n• Do NOT explain your reasoning.\n• Do NOT ask unnecessary follow-up questions.\n• ONLY generate the booking details and email content.\n\nGuidelines:\n• Always try to select flights within the user's budget.\n• If multiple flights match, prefer the cheapest suitable option.\n• Keep the response short, clear, and professional.\n• Mention flight details clearly.\n• Use priyangbhatt321@gmail.com as the booking email for all generated bookings.\n• Write the email in a natural and professional airline confirmation style.\n• Keep the email short, clean, and realistic.\n• Avoid robotic wording.\n• Make the email look like a real airline booking confirmation email.\n\nOutput requirements:\n• Respond ONLY with structured data that matches the expected output schema.\n• Do NOT include any extra text, commentary, or formatting."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -176,
+        -256
+      ],
+      "id": "34694363-5e26-417f-8363-abcd70d96a88",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "b22f8196-8e7d-4556-862e-029b59865f95",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "umAwPKnbVSs2DjbQ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes",
+          "mode": "list",
+          "cachedResultName": "flight",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1301746240,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes/edit#gid=1301746240"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        16
+      ],
+      "id": "7ba632fe-9933-41f5-9f7b-c69c7690d45f",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pMLLcwJ6GNE3Qm0N",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"name\": \"flight_booking_email\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"booking_email\": {\n      \"type\": \"string\",\n      \"description\": \"Email address where the flight ticket confirmation should be sent\"\n    },\n    \"email_subject\": {\n      \"type\": \"string\",\n      \"description\": \"Subject line for the flight booking confirmation email\"\n    },\n    \"email_body\": {\n      \"type\": \"string\",\n      \"description\": \"Professional flight booking confirmation email body with ticket details\"\n    }\n  },\n  \"required\": [\n    \"booking_email\",\n    \"email_subject\",\n    \"email_body\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "8b96f77d-112b-4b4e-bb31-ede5ce9ef136",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('AI Agent').item.json.output.booking_email }}",
+        "subject": "={{ $('AI Agent').item.json.output.email_subject }}",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output.email_body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        -208
+      ],
+      "id": "831c92e6-2696-424b-96a1-5e62b5c9e60e",
+      "name": "Send a message",
+      "webhookId": "34d3c013-71c0-4e6a-b258-7f070192dbc2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJaDzhPyPqYHvRkM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "message": "=Type approve if you want to continue with the selected flight booking, if not, type reject\n\nSubject : \n\n\n {{ $json.output.email_subject }}\n\nBody:\n\n{{ $json.output.email_body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        -160
+      ],
+      "id": "b1d667af-09cb-486b-8cdf-77c2a6f89aae",
+      "name": "Chat",
+      "webhookId": "6b5697e8-6f8e-4ca3-868b-6f8dc91296c1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68988263-4685-4cf9-867e-070c045816b0",
+              "leftValue": "={{ $json.chatInput }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "3813abe0-16c2-4194-9591-10bd6a86075e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "sanitize",
+        "text": "={{ $json.chatInput }}",
+        "guardrails": {
+          "pii": {
+            "value": {
+              "type": "selected",
+              "entities": [
+                "EMAIL_ADDRESS",
+                "IN_AADHAAR"
+              ]
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        -256
+      ],
+      "id": "d7cd885e-a691-462d-b9f8-942b84baf3a2",
+      "name": "Guardrails"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "87c91368-4351-4493-928f-0bca0557a8f9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bc8a3c0f33976ed3b940e47f20996e4ffcce3270c629cfc6a664611181b9d1a8"
+  },
+  "id": "78fkAldNIi2qqHIB",
+  "tags": []
+}

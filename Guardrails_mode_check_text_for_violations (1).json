@@ -1,0 +1,336 @@
+{
+  "name": "Guardrails_mode_check_text_for_violations",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -624,
+        -128
+      ],
+      "id": "e70b3fec-f8bf-4a06-b78f-f5285b9d2e36",
+      "name": "When chat message received",
+      "webhookId": "b1583f29-664d-46b8-8cf0-a45419cf7e46"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.guardrailsInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI Flight Booking Assistant supporting users with travel booking.\n\nThe user will provide travel details such as:\n- source city\n- destination city\n- budget\n- and sometimes preferred travel time.\n\nYour task is to:\n1. Search available flights from the provided flight database.\n2. Identify the most suitable flight based on the user's budget and travel route.\n3. Internally select the best flight option including:\n   - flight name\n   - source\n   - destination\n   - ticket price\n   - departure time\n   - available seats\n4. Generate professional booking details for the selected flight.\n5. Generate a professional flight booking confirmation email.\n6. Generate a professional confirmed flight booking email.\n7. Assume the email is sent only after human approval is completed in the workflow.\n8. The email should sound like a real confirmed airline reservation email.\n\nConstraints:\n• Do NOT perform payment or final reservation.\n• Do NOT explain your reasoning.\n• Do NOT ask unnecessary follow-up questions.\n• ONLY generate the booking details and email content.\n\nGuidelines:\n• Always try to select flights within the user's budget.\n• If multiple flights match, prefer the cheapest suitable option.\n• Keep the response short, clear, and professional.\n• Mention flight details clearly.\n• Use priyangbhatt321@gmail.com as the booking email for all generated bookings.\n• Write the email in a natural and professional airline confirmation style.\n• Keep the email short, clean, and realistic.\n• Avoid robotic wording.\n• Make the email look like a real airline booking confirmation email.\n\nOutput requirements:\n• Respond ONLY with structured data that matches the expected output schema.\n• Do NOT include any extra text, commentary, or formatting."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -208,
+        -192
+      ],
+      "id": "8ba7ea28-9226-44bc-a2be-dd9a6b2cd8b8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "80a8dcff-db48-4cee-97a1-5cf591a129b5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "umAwPKnbVSs2DjbQ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes",
+          "mode": "list",
+          "cachedResultName": "flight",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1301746240,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jzANiSO_ke1o-CbofwYqd371qb3_hvdhk1wz1ZUEAes/edit#gid=1301746240"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        16
+      ],
+      "id": "2aedff4f-586a-4439-bd88-5254ce9d5846",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pMLLcwJ6GNE3Qm0N",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"name\": \"flight_booking_email\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"booking_email\": {\n      \"type\": \"string\",\n      \"description\": \"Email address where the flight ticket confirmation should be sent\"\n    },\n    \"email_subject\": {\n      \"type\": \"string\",\n      \"description\": \"Subject line for the flight booking confirmation email\"\n    },\n    \"email_body\": {\n      \"type\": \"string\",\n      \"description\": \"Professional flight booking confirmation email body with ticket details\"\n    }\n  },\n  \"required\": [\n    \"booking_email\",\n    \"email_subject\",\n    \"email_body\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "b912e600-e89e-4b75-96d0-a130a88214e3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('AI Agent').item.json.output.booking_email }}",
+        "subject": "={{ $('AI Agent').item.json.output.email_subject }}",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output.email_body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        -208
+      ],
+      "id": "27f79ba3-db3d-4136-be5b-73dab7bb6866",
+      "name": "Send a message",
+      "webhookId": "c9d906e3-7979-49c7-8437-46842de44443",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJaDzhPyPqYHvRkM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "message": "=Type approve if you want to continue with the selected flight booking, if not, type reject\n\nSubject : \n\n\n {{ $json.output.email_subject }}\n\nBody:\n\n{{ $json.output.email_body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        -160
+      ],
+      "id": "4e55bda5-2f6f-4fb3-a74c-5aa149cc3b59",
+      "name": "Chat",
+      "webhookId": "2e61d7c2-a317-42fc-b1f3-5a3a4aa13c75"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68988263-4685-4cf9-867e-070c045816b0",
+              "leftValue": "={{ $json.chatInput }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "7b43f4ca-7191-4ce6-bc98-14411c8577fd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.chatInput }}",
+        "guardrails": {
+          "keywords": "idiot",
+          "pii": {
+            "value": {
+              "type": "selected",
+              "entities": [
+                "EMAIL_ADDRESS"
+              ]
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -288
+      ],
+      "id": "ada3691b-efda-4e5c-88ee-688900e4a073",
+      "name": "Guardrails1"
+    },
+    {
+      "parameters": {
+        "message": "your request was blocked by the guardrails policy because it contains restricted or unsafe content. Please verify your message and try again.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        -320
+      ],
+      "id": "9c6d71d3-7c99-4580-8eb1-6b1e4fcd8d4c",
+      "name": "Chat1",
+      "webhookId": "317f23d3-cf87-4a86-afd0-051fb1eb1ae6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Guardrails1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a4e9c197-aeac-4daf-975b-6e84d9ee9090",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bc8a3c0f33976ed3b940e47f20996e4ffcce3270c629cfc6a664611181b9d1a8"
+  },
+  "id": "1q9vLCWaLGwtER9Z",
+  "tags": []
+}
